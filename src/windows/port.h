@@ -155,6 +155,10 @@ enum { PTHREAD_ONCE_INIT = 0 };   // important that this be 0! for SpinLock
 #define pthread_equal(pthread_t_1, pthread_t_2)  ((pthread_t_1)==(pthread_t_2))
 #endif // HAVE_PTHREAD
 
+inline struct tm* localtime_r(const time_t* timep, struct tm* result) {
+  localtime_s(result, timep);
+  return result;
+}
 #ifndef HAVE_LOCALTIME_R
 extern GOOGLE_GLOG_DLL_DECL struct tm* localtime_r(const time_t* timep, struct tm* result);
 #endif // not HAVE_LOCALTIME_R
