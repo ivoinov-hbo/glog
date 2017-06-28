@@ -136,7 +136,6 @@ typedef int pid_t;
 #endif  // _MSC_VER
 
 // ----------------------------------- THREADS
-#ifndef __MINGW32__
 typedef DWORD pthread_t;
 typedef DWORD pthread_key_t;
 typedef LONG pthread_once_t;
@@ -148,7 +147,6 @@ inline struct tm* localtime_r(const time_t* timep, struct tm* result) {
   localtime_s(result, timep);
   return result;
 }
-#endif
 
 inline char* strerror_r(int errnum, char* buf, size_t buflen) {
   strerror_s(buf, buflen, errnum);
