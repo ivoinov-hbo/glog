@@ -357,7 +357,7 @@ void ATTRIBUTE_NOINLINE TestWithReturnAddress() {
 #endif
 }
 
-# elif defined(OS_WINDOWS)
+# elif defined(OS_WINDOWS) && defined(_MSVC_VER)
 
 #include <intrin.h>
 #pragma intrinsic(_ReturnAddress)
@@ -401,7 +401,7 @@ int main(int argc, char **argv) {
   TestWithPCInsideNonInlineFunction();
   TestWithReturnAddress();
   return RUN_ALL_TESTS();
-# elif defined(OS_WINDOWS)
+# elif defined(OS_WINDOWS) && defined(_MSVC_VER)
   TestWithReturnAddress();
   return RUN_ALL_TESTS();
 # else  // OS_WINDOWS
