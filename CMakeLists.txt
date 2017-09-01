@@ -483,6 +483,10 @@ if (HAVE_PTHREAD)
   target_link_libraries (glog PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 endif (HAVE_PTHREAD)
 
+if (MINGW)
+  target_link_libraries (glog PUBLIC dbghelp)
+endif (MINGW)
+
 if (WIN32 AND HAVE_SNPRINTF)
   set_property (SOURCE src/windows/port.cc APPEND PROPERTY COMPILE_DEFINITIONS
     HAVE_SNPRINTF)
