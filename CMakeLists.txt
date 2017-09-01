@@ -8,7 +8,7 @@ if (POLICY CMP0063)
   cmake_policy (SET CMP0063 NEW)
 endif (POLICY CMP0063)
 
-project (google-glog)
+project (glog)
 
 enable_testing ()
 
@@ -28,6 +28,7 @@ set (CPACK_PACKAGE_VERSION ${GLOG_VERSION})
 
 option (WITH_GFLAGS "Use gflags" ON)
 option (WITH_THREADS "Enable multithreading support" ON)
+option (WITH_TLS "Enable Thread Local Storage (TLS) support" ON)
 
 list (APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
@@ -45,11 +46,12 @@ include (CMakePackageConfigHelpers)
 include (CPack)
 include (CTest)
 include (DetermineGflagsNamespace)
+include (GNUInstallDirs)
 
 set (CMAKE_THREAD_PREFER_PTHREAD 1)
 
 if (WITH_GFLAGS)
-  find_package (gflags)
+  find_package (gflags 2.2.0)
 
   if (gflags_FOUND)
     set (HAVE_LIB_GFLAGS 1)
@@ -189,6 +191,31 @@ namespace Outer { namespace Inner { int i = 0; }}
 using namespace Outer::Inner;;
 int main() { return i; }
 " HAVE_NAMESPACES)
+
+check_cxx_source_compiles ("
+__declspec(thread) int tls;
+int main() { }
+" HAVE_MSVC_TLS)
+
+check_cxx_source_compiles ("
+thread_local int tls;
+int main() { }
+" HAVE_CXX11_TLS)
+
+check_cxx_source_compiles ("
+__attribute__((thread)) int tls;
+int main() { }
+" HAVE_CYGWIN_TLS)
+
+if (WITH_TLS)
+  if (HAVE_CYGWIN_TLS)
+    set (GLOG_THREAD_LOCAL_STORAGE "__attribute__((thread))")
+  elseif (HAVE_MSVC_TLS)
+    set (GLOG_THREAD_LOCAL_STORAGE "__declspec(thread)")
+  elseif (HAVE_CXX11_TLS)
+    set (GLOG_THREAD_LOCAL_STORAGE thread_local)
+  endif (HAVE_CYGWIN_TLS)
+endif (WITH_TLS)
 
 set (_PC_FIELDS
   "gregs[REG_PC]"
@@ -364,9 +391,9 @@ set (GLOG_SRCS
   src/vlog_is_on.cc
 )
 
-if (HAVE_PTHREAD)
+if (HAVE_PTHREAD OR WIN32)
   list (APPEND GLOG_SRCS src/signalhandler.cc)
-endif (HAVE_PTHREAD)
+endif (HAVE_PTHREAD OR WIN32)
 
 if (WIN32)
   list (APPEND GLOG_SRCS
@@ -397,8 +424,7 @@ if (WIN32 AND HAVE_SNPRINTF)
 endif (WIN32 AND HAVE_SNPRINTF)
 
 if (gflags_FOUND)
-  target_include_directories (glog PUBLIC $<BUILD_INTERFACE:${gflags_INCLUDE_DIR}>)
-  target_link_libraries (glog PUBLIC ${gflags_LIBRARIES})
+  target_link_libraries (glog PUBLIC gflags)
 
   if (NOT BUILD_SHARED_LIBS)
     # Don't use __declspec(dllexport|dllimport) if this is a static build
@@ -415,10 +441,15 @@ endif (WIN32)
 
 set_target_properties (glog PROPERTIES PUBLIC_HEADER "${GLOG_PUBLIC_H}")
 
+set (_glog_CMake_BINDIR ${CMAKE_INSTALL_BINDIR})
+set (_glog_CMake_INCLUDE_DIR ${CMAKE_INSTALL_INCLUDEDIR})
+set (_glog_CMake_LIBDIR ${CMAKE_INSTALL_LIBDIR})
+set (_glog_CMake_INSTALLDIR ${_glog_CMake_LIBDIR}/cmake/glog)
+
 target_include_directories (glog BEFORE PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>"
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>"
-  "$<INSTALL_INTERFACE:include>"
+  "$<INSTALL_INTERFACE:${_glog_CMake_INCLUDE_DIR}>"
   PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
@@ -454,6 +485,11 @@ endif (NOT BUILD_SHARED_LIBS)
 if (HAVE_EXECINFO_H)
   set (HAVE_STACKTRACE 1)
 endif (HAVE_EXECINFO_H)
+
+if (WIN32)
+  set (HAVE_STACKTRACE 1)
+  set (HAVE_SYMBOLIZE 1)
+endif (WIN32)
 
 if (UNIX OR (APPLE AND HAVE_DLADDR))
   set (HAVE_SYMBOLIZE 1)
@@ -555,10 +591,10 @@ endif (BUILD_TESTING)
 
 install (TARGETS glog
   EXPORT glog-targets
-  RUNTIME DESTINATION bin
-  PUBLIC_HEADER DESTINATION include/glog
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib)
+  RUNTIME DESTINATION ${_glog_CMake_BINDIR}
+  PUBLIC_HEADER DESTINATION ${_glog_CMake_INCLUDE_DIR}/glog
+  LIBRARY DESTINATION ${_glog_CMake_LIBDIR}
+  ARCHIVE DESTINATION ${_glog_CMake_LIBDIR})
 
 if (gflags_FOUND)
   set (gflags_DEPENDENCY "find_dependency (gflags ${gflags_VERSION})")
@@ -566,7 +602,7 @@ endif (gflags_FOUND)
 
 configure_package_config_file (glog-config.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/glog-config.cmake
-  INSTALL_DESTINATION lib/cmake/glog
+  INSTALL_DESTINATION ${_glog_CMake_INSTALLDIR}
   NO_CHECK_REQUIRED_COMPONENTS_MACRO)
 
 write_basic_package_version_file (glog-config-version.cmake VERSION
@@ -578,6 +614,7 @@ export (PACKAGE glog)
 install (FILES
   ${CMAKE_CURRENT_BINARY_DIR}/glog-config.cmake
   ${CMAKE_CURRENT_BINARY_DIR}/glog-config-version.cmake
-  DESTINATION lib/cmake/glog)
+  DESTINATION ${_glog_CMake_INSTALLDIR})
 
-install (EXPORT glog-targets NAMESPACE glog:: DESTINATION lib/cmake/glog)
+install (EXPORT glog-targets NAMESPACE glog:: DESTINATION
+  ${_glog_CMake_INSTALLDIR})
