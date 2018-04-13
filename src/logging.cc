@@ -687,6 +687,7 @@ static void ColoredWriteToStderr(LogSeverity severity,
     return;
   }
 #ifdef OS_WINDOWS
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
   const HANDLE stderr_handle = GetStdHandle(STD_ERROR_HANDLE);
 
   // Gets the current text color.
@@ -704,6 +705,7 @@ static void ColoredWriteToStderr(LogSeverity severity,
   fflush(stderr);
   // Restores the text color.
   SetConsoleTextAttribute(stderr_handle, old_color_attrs);
+#endif // WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 #else
   fprintf(stderr, "\033[0;3%sm", GetAnsiColorCode(color));
   fwrite(message, len, 1, stderr);

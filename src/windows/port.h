@@ -82,8 +82,13 @@
 #define write   _write
 #define lseek   _lseek
 #define close   _close
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 #define popen   _popen
 #define pclose  _pclose
+#else
+#define popen NULL
+#define pclose NULL
+#endif
 #define R_OK    04           /* read-only (for access()) */
 #define S_ISDIR(m)  (((m) & _S_IFMT) == _S_IFDIR)
 #ifndef __MINGW32__
@@ -131,8 +136,11 @@ extern int GOOGLE_GLOG_DLL_DECL safe_vsnprintf(char *str, size_t size,
 
 // ----------------------------------- SYSTEM/PROCESS
 typedef int pid_t;
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 #define getpid  _getpid
-
+#else
+#define getpid GetCurrentProcessId
+#endif // WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 #endif  // _MSC_VER
 
 // ----------------------------------- THREADS
@@ -158,6 +166,14 @@ inline char* strerror_r(int errnum, char* buf, size_t buflen) {
 #ifndef __cplusplus
 /* I don't see how to get inlining for C code in MSVC.  Ah well. */
 #define inline
+#endif
+
+#if !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+#define getenv(x) ""
+#define MAX_COMPUTERNAME_LENGTH 0
+#define GetComputerNameA(x, y) false
+#define GetTempPathA(x, y) false
+#define GetWindowsDirectoryA(x, y) false
 #endif
 
 #endif  /* _WIN32 */
