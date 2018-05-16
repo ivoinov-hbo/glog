@@ -104,6 +104,12 @@ check_function_exists (pwrite HAVE_PWRITE)
 check_function_exists (sigaction HAVE_SIGACTION)
 check_function_exists (sigaltstack HAVE_SIGALSTACK)
 
+if (TVOS)
+  message ("YOUI -> it's tvos, so we can't do syscall")
+  set(HAVE_SYS_SYSCALL_H OFF CACHE INTERNAL OFF FORCE)
+  set(HAVE_SYSCALL_H OFF CACHE INTERNAL OFF FORCE)
+endif()
+
 # NOTE gcc does not fail if you pass a non-existent -Wno-* option as an
 # argument. However, it will happily fail if you pass the corresponding -W*
 # option. So, we check whether options that disable warnings exist by testing

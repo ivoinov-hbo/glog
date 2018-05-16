@@ -241,6 +241,7 @@ bool PidHasChanged() {
 
 pid_t GetTID() {
   // On Linux and MacOSX, we try to use gettid().
+#if defined HAVE_SYSCALL_H || defined HAVE_SYS_SYSCALL_H
 #if defined OS_LINUX || defined OS_MACOSX
 #ifndef __NR_gettid
 #ifdef OS_MACOSX
@@ -264,6 +265,7 @@ pid_t GetTID() {
     lacks_gettid = true;
   }
 #endif  // OS_LINUX || OS_MACOSX
+#endif  // HAVE_SYSCALL_H || HAVE_SYS_SYSCALL_H
 
   // If gettid() could not be used, we use one of the following.
 #if defined OS_LINUX
