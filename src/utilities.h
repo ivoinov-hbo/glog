@@ -135,8 +135,10 @@
 // Use dladdr to symbolize.
 # define HAVE_SYMBOLIZE
 #elif defined(OS_WINDOWS)
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 // Use DbgHelp to symbolize
 # define HAVE_SYMBOLIZE
+#endif
 #endif
 #endif // !defined(HAVE_SYMBOLIZE)
 
