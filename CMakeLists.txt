@@ -414,6 +414,10 @@ add_library (glog
   ${GLOG_SRCS}
 )
 
+if (WIN32)
+  target_compile_definitions(glog PRIVATE _SCL_SECURE_NO_WARNINGS)
+endif()
+
 set_target_properties (glog PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 if (UNWIND_LIBRARY)
@@ -498,7 +502,11 @@ endif (HAVE_EXECINFO_H)
 
 if (WIN32)
   set (HAVE_STACKTRACE 1)
-  set (HAVE_SYMBOLIZE 1)
+  if (${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
+    set (HAVE_SYMBOLIZE 0)
+  else()
+    set (HAVE_SYMBOLIZE 1)
+  endif()
 endif (WIN32)
 
 if (UNIX OR (APPLE AND HAVE_DLADDR))
