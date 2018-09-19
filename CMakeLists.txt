@@ -93,16 +93,26 @@ check_include_file_cxx ("tr1/unordered_set" HAVE_TR1_UNORDERED_SET)
 check_include_file_cxx ("unordered_map" HAVE_UNORDERED_MAP)
 check_include_file_cxx ("unordered_set" HAVE_UNORDERED_SET)
 
-check_type_size ("unsigned __int16" HAVE___UINT16)
-check_type_size (u_int16_t HAVE_U_INT16_T)
-check_type_size (uint16_t HAVE_UINT16_T)
+if(TIZEN_NACL)
+  # check_type_size does not work with NaCl.
+  # This CMake only uses it to determine if it is available. 
+  set(HAVE_UINT16_T 1)
+else()
+  check_type_size ("unsigned __int16" HAVE___UINT16)
+  check_type_size (u_int16_t HAVE_U_INT16_T)
+  check_type_size (uint16_t HAVE_UINT16_T)
+endif()
 
 check_function_exists (dladdr HAVE_DLADDR)
 check_function_exists (fcntl HAVE_FCNTL)
 check_function_exists (pread HAVE_PREAD)
 check_function_exists (pwrite HAVE_PWRITE)
-check_function_exists (sigaction HAVE_SIGACTION)
 check_function_exists (sigaltstack HAVE_SIGALSTACK)
+
+if(NOT TIZEN_NACL)
+  # NaCl has sigaction but does not have all the types that are being used in the code which uses HAVE_SIGACTION.
+  check_function_exists (sigaction HAVE_SIGACTION)
+endif()
 
 if (TVOS)
   message ("YOUI -> it's tvos, so we can't do syscall")
