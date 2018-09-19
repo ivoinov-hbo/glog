@@ -278,9 +278,13 @@ static pthread_t* g_entered_thread_id_pointer = NULL;
 // signal handler once our job is done.
 #if defined(OS_WINDOWS)
 void FailureSignalHandler(int signal_number)
-#else
+#elif defined(HAVE_SIGACTION)
 void FailureSignalHandler(int signal_number,
                           siginfo_t *signal_info,
+                          void *ucontext)
+#else
+void FailureSignalHandler(int signal_number,
+                          void *signal_info,
                           void *ucontext)
 #endif
 {
