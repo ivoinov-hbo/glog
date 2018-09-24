@@ -29,12 +29,21 @@
 //
 // Author: Shinichiro Hamaji
 
+#if defined(YI_PORT_FILE_REQUIRED)
+#include <YiPort.h>
+#endif
+
 #include "utilities.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
+#if defined(__ORBIS__)
+// Skip signal on PS4
+#else
 #include <signal.h>
+#endif
+
 #ifdef HAVE_SYS_TIME_H
 # include <sys/time.h>
 #endif

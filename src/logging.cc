@@ -29,6 +29,10 @@
 
 #define _GNU_SOURCE 1 // needed for O_NOFOLLOW and pread()/pwrite()
 
+#if defined(YI_PORT_FILE_REQUIRED)
+#include <YiPort.h>
+#endif
+
 #include "utilities.h"
 
 #include <algorithm>
@@ -65,6 +69,16 @@
 
 #ifdef HAVE_STACKTRACE
 # include "stacktrace.h"
+#endif
+
+#if defined(__ORBIS__)
+#include <time.h>
+// localtime_r replacement, like from windows port.h
+struct tm* localtime_r(const time_t* timep, struct tm* result) {
+  struct tm* r = localtime(timep);
+  *result = *r;
+  return result;
+}
 #endif
 
 using std::string;
@@ -937,7 +951,7 @@ bool LogFileObject::CreateLogfile(const string& time_pid_string) {
     linkpath += linkname;
     unlink(linkpath.c_str());                    // delete old one if it exists
 
-#if defined(OS_WINDOWS)
+#if defined(OS_WINDOWS) || defined (__ORBIS__)
     // TODO(hamaji): Create lnk file on Windows?
 #elif defined(HAVE_UNISTD_H)
     // We must have unistd.h.

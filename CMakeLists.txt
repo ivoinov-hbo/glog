@@ -108,6 +108,13 @@ if (TVOS)
   set(HAVE_SYSCALL_H OFF CACHE INTERNAL OFF FORCE)
 endif()
 
+if (PS4)
+  message ("YOUI -> on PS4 we can't do unwind, sigaction or fcntl")
+  set(HAVE_UNWIND_H OFF CACHE INTERNAL OFF FORCE)
+  set(HAVE_SIGACTION OFF CACHE INTERNAL OFF FORCE)
+  set(HAVE_FCNTL OFF CACHE INTERNAL OFF FORCE)
+endif()
+
 # NOTE gcc does not fail if you pass a non-existent -Wno-* option as an
 # argument. However, it will happily fail if you pass the corresponding -W*
 # option. So, we check whether options that disable warnings exist by testing

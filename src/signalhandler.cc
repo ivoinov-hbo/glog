@@ -31,12 +31,21 @@
 //
 // Implementation of InstallFailureSignalHandler().
 
+#if defined(YI_PORT_FILE_REQUIRED)
+#include <YiPort.h>
+#endif
+
 #include "utilities.h"
 #include "stacktrace.h"
 #include "symbolize.h"
 #include "glog/logging.h"
 
+#if defined(__ORBIS__)
+// Skip signal on PS4
+#else
 #include <signal.h>
+#endif
+
 #include <time.h>
 #ifdef HAVE_UCONTEXT_H
 # include <ucontext.h>
