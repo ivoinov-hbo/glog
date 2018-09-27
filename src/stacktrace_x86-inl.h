@@ -74,7 +74,7 @@ static void **NextStackFrame(void **old_sp) {
   // last two pages in the address space
   if ((uintptr_t)new_sp >= 0xffffe000) return NULL;
 #endif
-#if !defined(OS_WINDOWS)
+#if !defined(OS_WINDOWS) && !defined(__native_client__)
   if (!STRICT_UNWINDING) {
     // Lax sanity checks cause a crash in 32-bit tcmalloc/crash_reason_test
     // on AMD-based machines with VDSO-enabled kernels.
