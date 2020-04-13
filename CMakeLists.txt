@@ -112,6 +112,9 @@ check_function_exists (sigaltstack HAVE_SIGALSTACK)
 if(NOT TIZEN_NACL)
   # NaCl has sigaction but does not have all the types that are being used in the code which uses HAVE_SIGACTION.
   check_function_exists (sigaction HAVE_SIGACTION)
+else()
+  set(HAVE_SYS_SYSCALL_H OFF CACHE INTERNAL OFF FORCE)
+  set(HAVE_SYSCALL_H OFF CACHE INTERNAL OFF FORCE)
 endif()
 
 if (TVOS)
