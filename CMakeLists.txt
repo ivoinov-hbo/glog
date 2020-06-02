@@ -95,7 +95,7 @@ check_include_file_cxx ("unordered_set" HAVE_UNORDERED_SET)
 
 if(TIZEN_NACL)
   # check_type_size does not work with NaCl.
-  # This CMake only uses it to determine if it is available. 
+  # This CMake only uses it to determine if it is available.
   set(HAVE_UINT16_T 1)
 else()
   check_type_size ("unsigned __int16" HAVE___UINT16)
@@ -123,8 +123,8 @@ if (TVOS)
   set(HAVE_SYSCALL_H OFF CACHE INTERNAL OFF FORCE)
 endif()
 
-if (PS4)
-  message ("YOUI -> on PS4 we can't do unwind, sigaction or fcntl")
+if (PS4 OR PS5)
+  message ("YOUI -> on PS4/PS5 we can't do unwind, sigaction or fcntl")
   set(HAVE_UNWIND_H OFF CACHE INTERNAL OFF FORCE)
   set(HAVE_LIBUNWIND_H OFF CACHE INTERNAL OFF FORCE)
   set(HAVE_SIGACTION OFF CACHE INTERNAL OFF FORCE)

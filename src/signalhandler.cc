@@ -40,8 +40,8 @@
 #include "symbolize.h"
 #include "glog/logging.h"
 
-#if defined(__ORBIS__)
-// Skip signal on PS4
+#if defined(__ORBIS__) || defined(__PROSPERO__)
+// Skip signal on PS4/PS5
 #else
 #include <signal.h>
 #endif

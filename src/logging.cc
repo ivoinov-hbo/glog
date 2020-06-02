@@ -71,7 +71,7 @@
 # include "stacktrace.h"
 #endif
 
-#if defined(__ORBIS__)
+#if defined(__ORBIS__) || defined(__PROSPERO__)
 #include <time.h>
 // localtime_r replacement, like from windows port.h
 struct tm* localtime_r(const time_t* timep, struct tm* result) {
@@ -949,7 +949,7 @@ bool LogFileObject::CreateLogfile(const string& time_pid_string) {
     linkpath += linkname;
     unlink(linkpath.c_str());                    // delete old one if it exists
 
-#if defined(OS_WINDOWS) || defined (__ORBIS__)
+#if defined(OS_WINDOWS) || defined (__ORBIS__) || defined(__PROSPERO__)
     // TODO(hamaji): Create lnk file on Windows?
 #elif defined(HAVE_UNISTD_H)
     // We must have unistd.h.
