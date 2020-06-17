@@ -126,8 +126,15 @@ endif()
 if (PS4)
   message ("YOUI -> on PS4 we can't do unwind, sigaction or fcntl")
   set(HAVE_UNWIND_H OFF CACHE INTERNAL OFF FORCE)
+  set(HAVE_LIBUNWIND_H OFF CACHE INTERNAL OFF FORCE)
   set(HAVE_SIGACTION OFF CACHE INTERNAL OFF FORCE)
   set(HAVE_FCNTL OFF CACHE INTERNAL OFF FORCE)
+endif()
+
+if (ANDROID)
+  message ("YOUI -> disable libunwind due to a bug in NDK where libunwind was included from the host instead of the target")
+  set(HAVE_UNWIND_H OFF CACHE INTERNAL OFF FORCE)
+  set(HAVE_LIBUNWIND_H OFF CACHE INTERNAL OFF FORCE)
 endif()
 
 # NOTE gcc does not fail if you pass a non-existent -Wno-* option as an
@@ -144,10 +151,11 @@ check_cxx_compiler_flag (-Wunnamed-type-template-args
 # snprintf as an inline function
 check_symbol_exists (snprintf stdio.h HAVE_SNPRINTF)
 
-check_library_exists (unwind get_static_proc_name "" HAVE_LIB_UNWIND)
-
-find_library (UNWIND_LIBRARY NAMES unwind DOC "unwind library")
-mark_as_advanced (UNWIND_LIBRARY)
+if (HAVE_LIBUNWIND_H OR HAVE_UNWIND_H)
+  check_library_exists (unwind get_static_proc_name "" HAVE_LIB_UNWIND)
+  find_library (UNWIND_LIBRARY NAMES unwind DOC "unwind library")
+  mark_as_advanced (UNWIND_LIBRARY)
+endif()
 
 check_c_source_compiles ("
 #include <stdlib.h>
